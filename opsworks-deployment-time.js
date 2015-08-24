@@ -9,14 +9,22 @@
 // @grant        none
 // ==/UserScript==
 
+$(window).load(function() {
+    waitForKeyElements("a[data-binding=CreatedAt], a[data-binding=CompletedAt]", replaceTimestamps, true);
 
-waitForKeyElements ("a[data-binding=CreatedAt], a[data-binding=CompletedAt]", replaceTimestamps, true);
-
-function replaceTimestamps (selectorResult) {
-    selectorResult.replaceWith(function() {
-      var $newObj = $(this).clone();
-      var localDate = (new Date($newObj.text()+" UTC")).toString();
-      $newObj.text(localDate);
-      return $newObj;
+    $(document).ajaxComplete(function(e, xhr, settings) {
+        replaceTimestamps($('td[data-binding=CreatedAt], td[data-binding=CompletedAt]'));
     });
-}
+
+    function replaceTimestamps(selectorResult) {
+        selectorResult.replaceWith(function() {
+            var $newObj = $(this).clone();
+            var utcOffset = $newObj.is("td") == true ? "" : " UTC";
+            console.log(utcOffset);
+            var localDate = (new Date($newObj.text() + utcOffset)).toString();
+            $newObj.text(localDate);
+            return $newObj;
+        });
+    }
+
+})
